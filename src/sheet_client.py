@@ -74,3 +74,11 @@ def mark_error(row_num: int, error_message: str):
     msg = f"❌ {error_message[:200]}"
     ws.update_cell(row_num, config.COL_ISSUE_STATUS, msg)
 
+
+def mark_unissued(row_num: int):
+    """過去日エラー時の書き戻し: U列は触らず, O列="未発行".
+    日付を修正して再実行すれば再度処理対象になる.
+    """
+    ws = _get_worksheet()
+    ws.update_cell(row_num, config.COL_ISSUE_STATUS, "未発行")
+
