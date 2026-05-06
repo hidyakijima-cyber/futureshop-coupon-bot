@@ -13,6 +13,15 @@ from . import gmail_client
 SCREENSHOT_DIR = "screenshots"
 
 
+class PastDateError(Exception):
+    """H列(公開開始)が過去日の時に発生する例外."""
+    pass
+
+
+class FutureShopClient:
+
+
+
 class FutureShopClient:
     def __init__(self, headless: bool = True):
         self.headless = headless
