@@ -1,0 +1,53 @@
+name: Issue FutureShop Coupons
+
+on:
+  workflow_dispatch:
+    inputs:
+      triggered_by:
+        description: 'Triggered by user'
+        required: false
+        default: 'manual'
+
+jobs:
+  issue-coupons:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Cache pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          playwright install --with-deps chromium
+
+      - name: Run coupon issuance
+        env:
+          FS_STORE_KEY: ${{ secrets.FS_STORE_KEY }}
+          FS_ACCOUNT_ID: ${{ secrets.FS_ACCOUNT_ID }}
+          FS_PASSWORD: ${{ secrets.FS_PASSWORD }}
+          GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
+          GMAIL_CLIENT_ID: ${{ secrets.GMAIL_CLIENT_ID }}
+          GMAIL_CLIENT_SECRET: ${{ secrets.GMAIL_CLIENT_SECRET }}
+          GMAIL_REFRESH_TOKEN: ${{ secrets.GMAIL_REFRESH_TOKEN }}
+          SPREADSHEET_ID: ${{ secrets.SPREADSHEET_ID }}
+          TRIGGERED_BY: ${{ github.event.inputs.triggered_by }}
+        run: python -m src.main
+
+      - name: Upload screenshots on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: failure-screenshots
+          path: screenshots/
+          if-no-files-found: ignore
