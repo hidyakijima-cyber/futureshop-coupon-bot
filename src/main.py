@@ -29,8 +29,10 @@ def main() -> int:
 
         for t in targets:
             if not t["coupon_code"] or not t["promo_title"]:
+                err_msg = "必須項目欠落 (クーポンコード/プロモタイトル)"
                 fail += 1
-                errors.append(f"行{t['row_num']}: 必須項目欠落")
+                errors.append(f"行{t['row_num']}: {err_msg}")
+                sheet_client.mark_error(t["row_num"], err_msg)
                 continue
             try:
                 fs.create_coupon(
@@ -42,9 +44,12 @@ def main() -> int:
                 sheet_client.mark_issued(t["row_num"])
                 success += 1
             except Exception as e:
+                err_msg = str(e)
                 fail += 1
-                errors.append(f"行{t['row_num']} ({t['coupon_code']}): {e}")
-                print(f"  ❌ {t['coupon_code']} 失敗: {e}")
+                errors.append(f"行{t['row_num']} ({t['coupon_code']}): {err_msg}")
+                print(f"  ❌ {t['coupon_code']} 失敗: {err_msg}")
+                sheet_client.mark_error(t["row_num"], err_msg)
+
 
     print(f"\n=== 完了 ===")
     print(f"成功: {success}件 / 失敗: {fail}件")
