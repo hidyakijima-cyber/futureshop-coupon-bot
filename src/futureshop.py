@@ -77,10 +77,12 @@ class FutureShopClient:
             current_url = self.page.url
             print(f"  認証後URL: {current_url}")
 
-        if "Top.htm" not in current_url:
+        # 従来UI (/FutureShop2/Top.htm) と新UI (/admin/top/) の両方を許容
+        if "Top.htm" not in current_url and "/admin/top" not in current_url:
             self._screenshot("login_failed")
             raise RuntimeError(f"ログイン失敗: 想定外URL {current_url}")
         print("ログイン完了 ✓")
+
 
     def create_coupon(self, *, coupon_code: str, promo_title: str,
                       publish_start: str, publish_end: str) -> None:
