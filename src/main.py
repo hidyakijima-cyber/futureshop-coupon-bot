@@ -44,12 +44,19 @@ def main() -> int:
                 )
                 sheet_client.mark_issued(t["row_num"])
                 success += 1
+            except PastDateError as e:
+                err_msg = str(e)
+                fail += 1
+                errors.append(f"行{t['row_num']} ({t['coupon_code']}): {err_msg}")
+                print(f"  ⚠️ {t['coupon_code']} 過去日エラー: {err_msg}")
+                sheet_client.mark_unissued(t["row_num"])
             except Exception as e:
                 err_msg = str(e)
                 fail += 1
                 errors.append(f"行{t['row_num']} ({t['coupon_code']}): {err_msg}")
                 print(f"  ❌ {t['coupon_code']} 失敗: {err_msg}")
                 sheet_client.mark_error(t["row_num"], err_msg)
+
 
 
     print(f"\n=== 完了 ===")
