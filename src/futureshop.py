@@ -1,7 +1,10 @@
 """FutureShop 操作 (Playwright)."""
 import os
 import re
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
+
+JST = timezone(timedelta(hours=9))
+
 from playwright.sync_api import sync_playwright, Browser, Page
 from . import config
 from . import gmail_client
@@ -89,13 +92,28 @@ class FutureShopClient:
         """1件のクーポンを発行."""
         print(f"  クーポン発行: {coupon_code} ({promo_title})")
 
-        # 日付組み立て
+        # 日付組み立て (JST基準)
         ps_date = self._parse_date(publish_start)
         pe_date = self._parse_date(publish_end)
-        now = datetime.now()
-        start_time = now + timedelta(minutes=10)
-        ps_full = ps_date.replace(hour=start_time.hour, minute=start_time.minute)
+        now_jst = datetime.now(JST)
+        today_jst = now_jst.date()
+
+        # H列が過去日ならエラー
+        if ps_date.date() < today_jst:
+            raise ValueError(
+                f"H列(公開開始)が過去日です: {publish_start} "
+                f"(本日: {today_jst.strftime('%Y/%m/%d')})"
+            )
+
+        # 時刻の決定: 当日なら現在JST+10分、未来日なら05:00固定
+        if ps_date.date() == today_jst:
+            start_time = now_jst + timedelta(minutes=10)
+            ps_full = ps_date.replace(hour=start_time.hour, minute=start_time.minute)
+        else:
+            ps_full = ps_date.replace(hour=5, minute=0)
+
         pe_full = pe_date.replace(hour=23, minute=59)
+
 
         # 新規作成画面へ
         self.page.goto(f"{config.FS_BASE}/FutureShop2/NewCouponEntry.htm")
