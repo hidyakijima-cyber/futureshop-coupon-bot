@@ -2,7 +2,8 @@
 import sys
 from . import config
 from . import sheet_client
-from .futureshop import FutureShopClient
+from .futureshop import FutureShopClient, PastDateError
+
 
 
 def main() -> int:
