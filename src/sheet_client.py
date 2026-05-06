@@ -63,3 +63,14 @@ def mark_issued(row_num: int):
     ws = _get_worksheet()
     ws.update_cell(row_num, config.COL_ISSUED_FLAG, "TRUE")
     ws.update_cell(row_num, config.COL_ISSUE_STATUS, "発行済み")
+
+
+def mark_error(row_num: int, error_message: str):
+    """失敗時の書き戻し: U列=ERROR, O列=エラーメッセージ.
+    実行者がスプシで失敗理由を確認できるようにする.
+    """
+    ws = _get_worksheet()
+    ws.update_cell(row_num, config.COL_ISSUED_FLAG, "ERROR")
+    msg = f"❌ {error_message[:200]}"
+    ws.update_cell(row_num, config.COL_ISSUE_STATUS, msg)
+
