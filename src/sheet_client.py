@@ -42,8 +42,10 @@ def get_target_rows() -> list[dict]:
             continue
 
         issued_flag = cell(config.COL_ISSUED_FLAG).strip().upper()
-        if issued_flag in ("TRUE", "1"):
+        # 空欄/FALSE/0 のみ処理対象。TRUE(発行済み)やERROR(エラー)は対象外
+        if issued_flag not in ("", "FALSE", "0"):
             continue
+
 
         targets.append({
             "row_num": i,
