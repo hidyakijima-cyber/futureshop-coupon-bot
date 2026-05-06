@@ -107,12 +107,13 @@ class FutureShopClient:
         now_jst = datetime.now(JST)
         today_jst = now_jst.date()
 
-        # H列が過去日ならエラー
+        # H列が過去日ならエラー (専用例外)
         if ps_date.date() < today_jst:
-            raise ValueError(
+            raise PastDateError(
                 f"H列(公開開始)が過去日です: {publish_start} "
                 f"(本日: {today_jst.strftime('%Y/%m/%d')})"
             )
+
 
         # 時刻の決定: 当日なら現在JST+10分、未来日なら05:00固定
         if ps_date.date() == today_jst:
